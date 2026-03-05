@@ -3,10 +3,14 @@
   "outputDirectory": "dist/public",
   "functions": {
     "api/index.ts": {
-      "includeFiles": ["../data/**"]
+      "includeFiles": ["data/**"]
     }
   },
   "rewrites": [
+    {
+      "source": "/api",
+      "destination": "/api/index.ts"
+    },
     {
       "source": "/api/(.*)",
       "destination": "/api/index.ts"
