@@ -1,12 +1,10 @@
+Meu vercel json:
 {
   "buildCommand": "pnpm run build:vercel",
   "outputDirectory": "dist/public",
   "functions": {
     "api/index.ts": {
-      "includeFiles": [
-        "server/**",
-        "data/**"
-      ]
+      "includeFiles": "data/**,server/**"
     }
   },
   "rewrites": [
