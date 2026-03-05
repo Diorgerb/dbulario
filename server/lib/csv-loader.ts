@@ -1,11 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const CSV_PATH = path.join(__dirname, "../../data/StatusBulasANVISA.csv");
+const CSV_PATH = path.join(process.cwd(), "data", "StatusBulasANVISA.csv");
 
 /* -------------------- CSV PARSER -------------------- */
 function parseCSV(content: string) {
@@ -25,6 +21,7 @@ function parseCSV(content: string) {
 
     for (let j = 0; j < lines[i].length; j++) {
       const char = lines[i][j];
+
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === "," && !inQuotes) {
@@ -34,9 +31,11 @@ function parseCSV(content: string) {
         current += char;
       }
     }
+
     values.push(current);
 
     const record: any = {};
+
     headers.forEach((h, idx) => {
       record[h] = (values[idx] || "")
         .replace(/^"|"$/g, "")
@@ -64,8 +63,8 @@ function normalizeMedication(row: any) {
     cnpj: row.cnpj || null,
     expediente: row.expediente || null,
     processNumber: row.numProcesso || null,
-    publicationDate, // atualização do bulário
-    lastUpdate,      // inclusão na plataforma
+    publicationDate,
+    lastUpdate,
     category: "medicamento",
     status: "ativo",
   };
@@ -86,6 +85,7 @@ function loadCSV() {
   const parsed = parseCSV(content);
 
   CACHE = parsed.map(normalizeMedication).filter(Boolean);
+
   console.log(`[CSV] Loaded ${CACHE.length} medications from CSV`);
 
   return CACHE;
@@ -105,14 +105,12 @@ export function listMedications(
     dateRange?: number;
   } = {}
 ) {
-
- 
   const data = loadCSV();
   let result = [...data];
 
-  // Busca textual
   if (filters.search) {
     const q = filters.search.toLowerCase();
+
     result = result.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
@@ -121,24 +119,38 @@ export function listMedications(
     );
   }
 
-  // Filtro por categoria
+  if (filters.numeroRegistro) {
+    result = result.filter((m) =>
+      m.registrationNumber.includes(filters.numeroRegistro!)
+    );
+  }
+
+  if (filters.razaoSocial) {
+    const q = filters.razaoSocial.toLowerCase();
+
+    result = result.filter(
+      (m) => m.holder && m.holder.toLowerCase().includes(q)
+    );
+  }
+
+  if (filters.cnpj) {
+    result = result.filter(
+      (m) => m.cnpj && m.cnpj.includes(filters.cnpj!)
+    );
+  }
+
   if (filters.category) {
-    result = result.filter(
-      (m) => m.category === filters.category
-    );
+    result = result.filter((m) => m.category === filters.category);
   }
 
-  // Filtro por status
   if (filters.status) {
-    result = result.filter(
-      (m) => m.status === filters.status
-    );
+    result = result.filter((m) => m.status === filters.status);
   }
 
-  // Filtro por data de atualização do bulário
   if (filters.dateRange !== undefined) {
     const since = new Date();
     since.setDate(since.getDate() - filters.dateRange);
+
     result = result.filter(
       (m) => m.publicationDate && m.publicationDate >= since
     );
@@ -228,6 +240,7 @@ export function getMedicationStats() {
 export function getRecentUpdates(days = 7) {
   const data = loadCSV();
   const since = new Date();
+
   since.setDate(since.getDate() - days);
 
   return data
