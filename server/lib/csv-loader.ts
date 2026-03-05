@@ -97,11 +97,16 @@ export function listMedications(
   limit = 10,
   filters: {
     search?: string;
+    numeroRegistro?: string;
+    razaoSocial?: string;
+    cnpj?: string;
     category?: string;
     status?: string;
-    dateRange?: number; // filtro pela atualização do bulário
+    dateRange?: number;
   } = {}
 ) {
+
+ 
   const data = loadCSV();
   let result = [...data];
 
