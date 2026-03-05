@@ -3,7 +3,7 @@
   "outputDirectory": "dist/public",
   "functions": {
     "api/index.ts": {
-      "includeFiles": ["data/**"]
+      "includeFiles": "data/**"
     }
   },
   "rewrites": [
