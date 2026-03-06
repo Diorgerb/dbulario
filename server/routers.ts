@@ -1,7 +1,7 @@
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
-import { medicationsRouter } from "./routers/medications";
-import { adminRouter } from "./routers/admin";
+import { systemRouter } from "./_core/systemRouter.js";
+import { publicProcedure, router } from "./_core/trpc.js";
+import { medicationsRouter } from "./routers/medications.js";
+import { adminRouter } from "./routers/admin.js";
 
 export const appRouter = router({
   system: systemRouter,

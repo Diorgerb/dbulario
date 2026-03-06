@@ -1,5 +1,5 @@
-import { router, publicProcedure } from "../_core/trpc";
-import { getMedicationStats } from "../lib/csv-loader";
+import { router, publicProcedure } from "../_core/trpc.js";
+import { getMedicationStats } from "../lib/csv-loader.js";
 
 export const adminRouter = router({
   getMedicationStats: publicProcedure.query(async () => {

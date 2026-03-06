@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, router } from "../_core/trpc.js";
 import {
   listMedications,
   searchMedications,
   getMedicationStats,
   getMedicationById,
   getRecentUpdates,
-} from "../lib/csv-loader";
+} from "../lib/csv-loader.js";
 
 export const medicationsRouter = router({
   /* -------------------- LISTAGEM PRINCIPAL -------------------- */
