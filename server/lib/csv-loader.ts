@@ -1,7 +1,34 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const CSV_PATH = path.join(process.cwd(), "data", "StatusBulasANVISA.csv");
+const CSV_FILENAME = "StatusBulasANVISA.csv";
+
+const currentFilePath = fileURLToPath(import.meta.url);
+const currentDirPath = path.dirname(currentFilePath);
+
+const CANDIDATE_CSV_PATHS = [
+  process.env.CSV_PATH,
+  path.join(process.cwd(), "data", CSV_FILENAME),
+  path.join(currentDirPath, "../../data", CSV_FILENAME),
+  path.join("/var/task/data", CSV_FILENAME),
+].filter((value): value is string => Boolean(value));
+
+function resolveCSVPath() {
+  const csvPath = CANDIDATE_CSV_PATHS.find((candidatePath) =>
+    fs.existsSync(candidatePath)
+  );
+
+  if (!csvPath) {
+    console.error("[CSV] File not found in any known path", {
+      candidates: CANDIDATE_CSV_PATHS,
+      cwd: process.cwd(),
+    });
+    return null;
+  }
+
+  return csvPath;
+}
 
 /* -------------------- CSV PARSER -------------------- */
 function parseCSV(content: string) {
@@ -76,17 +103,18 @@ let CACHE: any[] | null = null;
 function loadCSV() {
   if (CACHE) return CACHE;
 
-  if (!fs.existsSync(CSV_PATH)) {
-    console.error("[CSV] File not found:", CSV_PATH);
+  const csvPath = resolveCSVPath();
+
+  if (!csvPath) {
     return [];
   }
 
-  const content = fs.readFileSync(CSV_PATH, "utf8");
+  const content = fs.readFileSync(csvPath, "utf8");
   const parsed = parseCSV(content);
 
   CACHE = parsed.map(normalizeMedication).filter(Boolean);
 
-  console.log(`[CSV] Loaded ${CACHE.length} medications from CSV`);
+  console.log(`[CSV] Loaded ${CACHE.length} medications from CSV (${csvPath})`);
 
   return CACHE;
 }
