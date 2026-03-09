@@ -50,6 +50,17 @@ function parseDate(value: string | null | undefined) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function getDateStringDaysAgo(days: number) {
+  const base = startOfToday();
+  base.setDate(base.getDate() - days);
+
+  const year = base.getFullYear();
+  const month = String(base.getMonth() + 1).padStart(2, "0");
+  const day = String(base.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 function isReadableFile(filePath: string) {
   try {
     const stats = fs.statSync(filePath);
@@ -319,10 +330,11 @@ export function listMedications(
   }
 
   if (filters.dateRange !== undefined) {
-    const since = startOfToday();
-    since.setDate(since.getDate() - filters.dateRange);
+    const sinceDate = getDateStringDaysAgo(filters.dateRange);
 
-    result = result.filter((m) => m.publicationDate && m.publicationDate >= since);
+    result = result.filter(
+      (m) => m.publicationDateText && m.publicationDateText >= sinceDate
+    );
   }
 
   const total = result.length;
@@ -369,34 +381,25 @@ export function getMedicationById(id: number) {
 /* -------------------- ESTATÍSTICAS -------------------- */
 export function getMedicationStats() {
   const data = loadCSV();
-  const today = startOfToday();
-
-  const last7 = new Date(today);
-  last7.setDate(today.getDate() - 7);
-
-  const last30 = new Date(today);
-  last30.setDate(today.getDate() - 30);
-
-  const last90 = new Date(today);
-  last90.setDate(today.getDate() - 90);
+  const last7 = getDateStringDaysAgo(7);
+  const last30 = getDateStringDaysAgo(30);
+  const last90 = getDateStringDaysAgo(90);
 
   return {
     total: data.length,
-    updatedLast7Days: data.filter((m) => m.publicationDate && m.publicationDate >= last7).length,
-    updatedLast30Days: data.filter((m) => m.publicationDate && m.publicationDate >= last30).length,
-    updatedLast90Days: data.filter((m) => m.publicationDate && m.publicationDate >= last90).length,
+    updatedLast7Days: data.filter((m) => m.publicationDateText && m.publicationDateText >= last7).length,
+    updatedLast30Days: data.filter((m) => m.publicationDateText && m.publicationDateText >= last30).length,
+    updatedLast90Days: data.filter((m) => m.publicationDateText && m.publicationDateText >= last90).length,
   };
 }
 
 /* -------------------- ATUALIZAÇÕES RECENTES -------------------- */
 export function getRecentUpdates(days = 7) {
   const data = loadCSV();
-  const since = startOfToday();
-
-  since.setDate(since.getDate() - days);
+  const sinceDate = getDateStringDaysAgo(days);
 
   return data
-    .filter((m) => m.publicationDate && m.publicationDate >= since)
-    .sort((a, b) => b.publicationDate.getTime() - a.publicationDate.getTime())
+    .filter((m) => m.publicationDateText && m.publicationDateText >= sinceDate)
+    .sort((a, b) => (b.publicationDateText || "").localeCompare(a.publicationDateText || ""))
     .slice(0, 50);
 }

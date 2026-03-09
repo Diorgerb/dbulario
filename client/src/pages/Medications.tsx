@@ -222,7 +222,7 @@ export default function Medications() {
               </Select>
 
               <div
-                className={`relative rounded-md border border-blue-300 bg-blue-50 px-2.5 py-2 text-xs text-blue-900 transition-all duration-300 ${showCategoryHintBurst ? "scale-105 shadow" : ""}`}
+                className={`relative rounded-md border border-blue-400 bg-blue-100 px-2.5 py-2 text-xs text-blue-950 transition-all duration-300 ${showCategoryHintBurst ? "scale-105 shadow" : ""}`}
               >
                 {showCategoryHintBurst && (
                   <>
@@ -231,10 +231,10 @@ export default function Medications() {
                     <Sparkles className="absolute right-0 -top-4 h-4 w-4 text-blue-500 animate-bounce" />
                   </>
                 )}
-                <span className="font-medium">Filtro personalizado por CSV.</span>{" "}
+                <span className="font-semibold">Filtro personalizado por CSV.</span>{" "}
                 {categories.length > 0
-                  ? "Selecione um filtro para aplicar sua lista de interesse."
-                  : "Nenhum CSV encontrado em /data (ex.: medref.csv)."}
+                  ? "Selecione uma categoria para aplicar sua lista imediatamente."
+                  : "Nenhum CSV encontrado em /data. Adicione arquivos como medref.csv."}
               </div>
             </div>
           </div>
