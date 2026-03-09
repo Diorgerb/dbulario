@@ -167,6 +167,8 @@ export default function Medications() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Qualquer data</SelectItem>
+                <SelectItem value="1">Último 1 dia</SelectItem>
+                <SelectItem value="3">Últimos 3 dias</SelectItem>
                 <SelectItem value="7">Últimos 7 dias</SelectItem>
                 <SelectItem value="30">Últimos 30 dias</SelectItem>
                 <SelectItem value="90">Últimos 90 dias</SelectItem>
