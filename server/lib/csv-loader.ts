@@ -261,6 +261,11 @@ export function getCategoryRegistrationSet(category: string) {
 }
 
 /* -------------------- LISTAGEM -------------------- */
+function startOfToday() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 export function listMedications(
   page = 1,
   limit = 10,
@@ -314,7 +319,7 @@ export function listMedications(
   }
 
   if (filters.dateRange !== undefined) {
-    const since = new Date();
+    const since = startOfToday();
     since.setDate(since.getDate() - filters.dateRange);
 
     result = result.filter((m) => m.publicationDate && m.publicationDate >= since);
@@ -364,16 +369,16 @@ export function getMedicationById(id: number) {
 /* -------------------- ESTATÍSTICAS -------------------- */
 export function getMedicationStats() {
   const data = loadCSV();
-  const now = new Date();
+  const today = startOfToday();
 
-  const last7 = new Date();
-  last7.setDate(now.getDate() - 7);
+  const last7 = new Date(today);
+  last7.setDate(today.getDate() - 7);
 
-  const last30 = new Date();
-  last30.setDate(now.getDate() - 30);
+  const last30 = new Date(today);
+  last30.setDate(today.getDate() - 30);
 
-  const last90 = new Date();
-  last90.setDate(now.getDate() - 90);
+  const last90 = new Date(today);
+  last90.setDate(today.getDate() - 90);
 
   return {
     total: data.length,
@@ -386,7 +391,7 @@ export function getMedicationStats() {
 /* -------------------- ATUALIZAÇÕES RECENTES -------------------- */
 export function getRecentUpdates(days = 7) {
   const data = loadCSV();
-  const since = new Date();
+  const since = startOfToday();
 
   since.setDate(since.getDate() - days);
 

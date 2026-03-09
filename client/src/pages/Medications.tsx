@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -62,7 +62,6 @@ export default function Medications() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showCategoryHintBurst, setShowCategoryHintBurst] = useState(false);
-  const hasMountedFiltersRef = useRef(false);
 
   // Listagem de medicamentos
   const { data, isLoading, error } = trpc.medications.list.useQuery({
@@ -109,16 +108,11 @@ export default function Medications() {
 
 
   useEffect(() => {
-    if (!hasMountedFiltersRef.current) {
-      hasMountedFiltersRef.current = true;
-      return;
-    }
-
     setShowCategoryHintBurst(true);
 
     const timer = setTimeout(() => {
       setShowCategoryHintBurst(false);
-    }, 1000);
+    }, 900);
 
     return () => clearTimeout(timer);
   }, [selectedCategory, selectedDateRange]);
@@ -228,7 +222,7 @@ export default function Medications() {
               </Select>
 
               <div
-                className={`relative rounded-md border border-blue-200/70 bg-blue-50/70 px-2.5 py-1.5 text-[11px] text-blue-900 transition-all duration-300 ${showCategoryHintBurst ? "scale-105 shadow-sm" : "opacity-80"}`}
+                className={`relative rounded-md border border-blue-300 bg-blue-50 px-2.5 py-2 text-xs text-blue-900 transition-all duration-300 ${showCategoryHintBurst ? "scale-105 shadow" : ""}`}
               >
                 {showCategoryHintBurst && (
                   <>
@@ -237,9 +231,10 @@ export default function Medications() {
                     <Sparkles className="absolute right-0 -top-4 h-4 w-4 text-blue-500 animate-bounce" />
                   </>
                 )}
+                <span className="font-medium">Filtro personalizado por CSV.</span>{" "}
                 {categories.length > 0
-                  ? "Precisa de lista personalizada? Clique em um filtro e solicite um CSV sob medida."
-                  : "Adicione arquivos CSV em /data (ex.: medref.csv) para habilitar filtros personalizados."}
+                  ? "Selecione um filtro para aplicar sua lista de interesse."
+                  : "Nenhum CSV encontrado em /data (ex.: medref.csv)."}
               </div>
             </div>
           </div>
