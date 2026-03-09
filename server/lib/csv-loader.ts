@@ -25,6 +25,16 @@ function normalizeRegistrationNumber(value: string | null | undefined) {
   return (value || "").replace(/\D/g, "");
 }
 
+
+function parseDate(value: string | null | undefined) {
+  if (!value) return null;
+
+  const normalized = value.replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
+  const date = new Date(normalized);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function isReadableFile(filePath: string) {
   try {
     const stats = fs.statSync(filePath);
@@ -65,7 +75,7 @@ function resolveDataDir() {
         return candidate;
       }
 
-      if (stats.isFile() && path.basename(candidate) === CSV_FILENAME) {
+      if (stats.isFile()) {
         return path.dirname(candidate);
       }
     } catch {
@@ -123,8 +133,8 @@ function parseCSV(content: string) {
 function normalizeMedication(row: any) {
   if (!row.numeroRegistro || !row.nomeProduto) return null;
 
-  const publicationDate = row.data ? new Date(row.data) : null;
-  const lastUpdate = row.dataAtualizacao ? new Date(row.dataAtualizacao) : null;
+  const publicationDate = parseDate(row.data);
+  const lastUpdate = parseDate(row.dataAtualizacao);
 
   return {
     id: Number(row.idProduto),
@@ -179,7 +189,7 @@ export function getFilterCategories() {
   return fs
     .readdirSync(dataDir)
     .filter((fileName) => fileName.toLowerCase().endsWith(".csv"))
-    .filter((fileName) => fileName !== CSV_FILENAME)
+        .filter((fileName) => fileName.toLowerCase() !== CSV_FILENAME.toLowerCase())
     .map((fileName) => fileName.replace(/\.csv$/i, ""))
     .sort((a, b) => a.localeCompare(b, "pt-BR"));
 }

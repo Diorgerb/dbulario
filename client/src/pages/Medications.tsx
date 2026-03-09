@@ -43,6 +43,13 @@ interface Medication {
 
 function formatDate(value: string | null) {
   if (!value) return "-";
+
+  const datePart = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (datePart) {
+    const [, year, month, day] = datePart;
+    return `${day}/${month}/${year}`;
+  }
+
   const d = new Date(value);
   if (isNaN(d.getTime())) return "-";
   return d.toLocaleDateString("pt-BR");
@@ -222,7 +229,9 @@ export default function Medications() {
                 {showCategoryHintBurst && (
                   <Sparkles className="absolute -top-2 -right-2 h-4 w-4 text-blue-500 animate-bounce" />
                 )}
-                Quer uma lista personalizada? Solicite um CSV sob medida para seu interesse.
+                {categories.length === 0
+                  ? "Nenhum CSV de filtro encontrado em /data. Adicione arquivos como medref.csv para habilitar filtros."
+                  : "Quer uma lista personalizada? Solicite um CSV sob medida para seu interesse."}
               </div>
             </div>
           </div>
