@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -62,6 +62,7 @@ export default function Medications() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showCategoryHintBurst, setShowCategoryHintBurst] = useState(false);
+  const hasMountedFiltersRef = useRef(false);
 
   // Listagem de medicamentos
   const { data, isLoading, error } = trpc.medications.list.useQuery({
@@ -108,16 +109,19 @@ export default function Medications() {
 
 
   useEffect(() => {
-    if (selectedCategory === "all") return;
+    if (!hasMountedFiltersRef.current) {
+      hasMountedFiltersRef.current = true;
+      return;
+    }
 
     setShowCategoryHintBurst(true);
 
     const timer = setTimeout(() => {
       setShowCategoryHintBurst(false);
-    }, 1400);
+    }, 1000);
 
     return () => clearTimeout(timer);
-  }, [selectedCategory]);
+  }, [selectedCategory, selectedDateRange]);
 
   const medications: Medication[] = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -223,15 +227,14 @@ export default function Medications() {
                 </SelectContent>
               </Select>
 
-              <div
-                className={`relative rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900 transition-all duration-300 ${showCategoryHintBurst ? "scale-105 shadow-md" : ""}`}
-              >
+              <div className="relative h-0 pointer-events-none" aria-hidden="true">
                 {showCategoryHintBurst && (
-                  <Sparkles className="absolute -top-2 -right-2 h-4 w-4 text-blue-500 animate-bounce" />
+                  <>
+                    <span className="absolute right-4 -top-2 h-2.5 w-2.5 rounded-full bg-blue-400 animate-ping" />
+                    <span className="absolute right-4 -top-2 h-2.5 w-2.5 rounded-full bg-blue-500" />
+                    <Sparkles className="absolute right-0 -top-4 h-4 w-4 text-blue-500 animate-bounce" />
+                  </>
                 )}
-                {categories.length === 0
-                  ? "Nenhum CSV de filtro encontrado em /data. Adicione arquivos como medref.csv para habilitar filtros."
-                  : "Quer uma lista personalizada? Solicite um CSV sob medida para seu interesse."}
               </div>
             </div>
           </div>

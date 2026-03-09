@@ -29,8 +29,14 @@ function normalizeRegistrationNumber(value: string | null | undefined) {
 function parseDate(value: string | null | undefined) {
   if (!value) return null;
 
-  const normalized = value.replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
-  const date = new Date(normalized);
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (!match) {
+    return null;
+  }
+
+  const [, year, month, day] = match;
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
 
   return Number.isNaN(date.getTime()) ? null : date;
 }
