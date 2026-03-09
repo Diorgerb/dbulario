@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import MainLayout from "@/components/MainLayout";
 import {
@@ -53,6 +54,7 @@ export default function Medications() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [showCategoryHintBurst, setShowCategoryHintBurst] = useState(false);
 
   // Listagem de medicamentos
   const { data, isLoading, error } = trpc.medications.list.useQuery({
@@ -96,6 +98,19 @@ export default function Medications() {
     },
     [searchQuery, selectedCategory, selectedDateRange, utils]
   );
+
+
+  useEffect(() => {
+    if (selectedCategory === "all") return;
+
+    setShowCategoryHintBurst(true);
+
+    const timer = setTimeout(() => {
+      setShowCategoryHintBurst(false);
+    }, 1400);
+
+    return () => clearTimeout(timer);
+  }, [selectedCategory]);
 
   const medications: Medication[] = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -180,25 +195,36 @@ export default function Medications() {
               </SelectContent>
             </Select>
 
-            <Select
-              value={selectedCategory}
-              onValueChange={(v) => {
-                setSelectedCategory(v);
-                setCurrentPage(1);
-              }}
-            >
-              <SelectTrigger className="w-56">
-                <SelectValue placeholder="Filtro por categoria (CSV)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as categorias</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-2 w-56">
+              <Select
+                value={selectedCategory}
+                onValueChange={(v) => {
+                  setSelectedCategory(v);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-56">
+                  <SelectValue placeholder="Filtro por categoria (CSV)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div
+                className={`relative rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900 transition-all duration-300 ${showCategoryHintBurst ? "scale-105 shadow-md" : ""}`}
+              >
+                {showCategoryHintBurst && (
+                  <Sparkles className="absolute -top-2 -right-2 h-4 w-4 text-blue-500 animate-bounce" />
+                )}
+                Quer uma lista personalizada? Solicite um CSV sob medida para seu interesse.
+              </div>
+            </div>
           </div>
         </div>
       </section>
