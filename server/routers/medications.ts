@@ -6,6 +6,7 @@ import {
   getMedicationStats,
   getMedicationById,
   getRecentUpdates,
+  getFilterCategories,
 } from "../lib/csv-loader.js";
 
 export const medicationsRouter = router({
@@ -27,6 +28,7 @@ export const medicationsRouter = router({
         numeroRegistro: z.string().optional(),
         razaoSocial: z.string().optional(),
         cnpj: z.string().optional(),
+        category: z.string().optional(),
 
         /**
          * Intervalo em dias
@@ -41,6 +43,7 @@ export const medicationsRouter = router({
         numeroRegistro: input.numeroRegistro,
         razaoSocial: input.razaoSocial,
         cnpj: input.cnpj,
+        category: input.category,
         dateRange: input.dateRange,
       });
     }),
@@ -58,6 +61,11 @@ export const medicationsRouter = router({
         limit: input.limit,
       });
     }),
+
+
+  categories: publicProcedure.query(() => {
+    return getFilterCategories();
+  }),
 
   /* -------------------- ESTATÍSTICAS -------------------- */
   stats: publicProcedure.query(() => {

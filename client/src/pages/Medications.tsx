@@ -50,6 +50,7 @@ function formatDate(value: string | null) {
 export default function Medications() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDateRange, setSelectedDateRange] = useState<string>("todos");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -59,7 +60,10 @@ export default function Medications() {
     limit: itemsPerPage,
     search: searchQuery || undefined,
     dateRange: selectedDateRange === "todos" ? undefined : parseInt(selectedDateRange),
+    category: selectedCategory === "all" ? undefined : selectedCategory,
   });
+
+  const { data: categories = [] } = trpc.medications.categories.useQuery();
 
   // Estatísticas para painel superior
   const { data: stats } = trpc.medications.stats.useQuery();
@@ -74,6 +78,7 @@ export default function Medications() {
           limit: 10000,
           search: searchQuery || undefined,
           dateRange: selectedDateRange === "todos" ? undefined : parseInt(selectedDateRange),
+          category: selectedCategory === "all" ? undefined : selectedCategory,
         });
 
         const filename = getExportFilename(format);
@@ -89,7 +94,7 @@ export default function Medications() {
         toast.error("Erro ao exportar");
       }
     },
-    [searchQuery, selectedDateRange, utils]
+    [searchQuery, selectedCategory, selectedDateRange, utils]
   );
 
   const medications: Medication[] = data?.items ?? [];
@@ -167,18 +172,31 @@ export default function Medications() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Qualquer data</SelectItem>
+                <SelectItem value="1">Último 1 dia</SelectItem>
+                <SelectItem value="3">Últimos 3 dias</SelectItem>
                 <SelectItem value="7">Últimos 7 dias</SelectItem>
                 <SelectItem value="30">Últimos 30 dias</SelectItem>
                 <SelectItem value="90">Últimos 90 dias</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select disabled className="w-56">
-              <SelectTrigger>
-                <SelectValue placeholder="Lista Medicamentos Referências (sob demanda)" />
+            <Select
+              value={selectedCategory}
+              onValueChange={(v) => {
+                setSelectedCategory(v);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder="Filtro por categoria (CSV)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="medref">Medicamento Referência</SelectItem>
+                <SelectItem value="all">Todas as categorias</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
