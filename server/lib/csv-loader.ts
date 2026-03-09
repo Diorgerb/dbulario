@@ -26,7 +26,7 @@ function normalizeRegistrationNumber(value: string | null | undefined) {
 }
 
 
-function parseDate(value: string | null | undefined) {
+function extractDateOnly(value: string | null | undefined) {
   if (!value) return null;
 
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -36,8 +36,17 @@ function parseDate(value: string | null | undefined) {
   }
 
   const [, year, month, day] = match;
-  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  return `${year}-${month}-${day}`;
+}
 
+function parseDate(value: string | null | undefined) {
+  const dateOnly = extractDateOnly(value);
+
+  if (!dateOnly) {
+    return null;
+  }
+
+  const date = new Date(`${dateOnly}T12:00:00.000Z`);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
@@ -139,6 +148,8 @@ function parseCSV(content: string) {
 function normalizeMedication(row: any) {
   if (!row.numeroRegistro || !row.nomeProduto) return null;
 
+  const publicationDateText = extractDateOnly(row.data);
+  const lastUpdateText = extractDateOnly(row.dataAtualizacao);
   const publicationDate = parseDate(row.data);
   const lastUpdate = parseDate(row.dataAtualizacao);
 
@@ -153,6 +164,8 @@ function normalizeMedication(row: any) {
     processNumber: row.numProcesso || null,
     publicationDate,
     lastUpdate,
+    publicationDateText,
+    lastUpdateText,
     category: "medicamento",
     status: "ativo",
   };
@@ -317,8 +330,8 @@ export function listMedications(
     holder: m.holder ?? "-",
     cnpj: m.cnpj ?? "-",
     processNumber: m.processNumber ?? "-",
-    publicationDate: m.publicationDate ? m.publicationDate.toISOString() : null,
-    lastUpdate: m.lastUpdate ? m.lastUpdate.toISOString() : null,
+    publicationDate: m.publicationDateText ?? null,
+    lastUpdate: m.lastUpdateText ?? null,
     category: m.category,
     status: m.status,
   }));

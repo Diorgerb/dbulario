@@ -227,7 +227,9 @@ export default function Medications() {
                 </SelectContent>
               </Select>
 
-              <div className="relative h-0 pointer-events-none" aria-hidden="true">
+              <div
+                className={`relative rounded-md border border-blue-200/70 bg-blue-50/70 px-2.5 py-1.5 text-[11px] text-blue-900 transition-all duration-300 ${showCategoryHintBurst ? "scale-105 shadow-sm" : "opacity-80"}`}
+              >
                 {showCategoryHintBurst && (
                   <>
                     <span className="absolute right-4 -top-2 h-2.5 w-2.5 rounded-full bg-blue-400 animate-ping" />
@@ -235,6 +237,9 @@ export default function Medications() {
                     <Sparkles className="absolute right-0 -top-4 h-4 w-4 text-blue-500 animate-bounce" />
                   </>
                 )}
+                {categories.length > 0
+                  ? "Precisa de lista personalizada? Clique em um filtro e solicite um CSV sob medida."
+                  : "Adicione arquivos CSV em /data (ex.: medref.csv) para habilitar filtros personalizados."}
               </div>
             </div>
           </div>
