@@ -29,14 +29,21 @@ function normalizeRegistrationNumber(value: string | null | undefined) {
 function extractDateOnly(value: string | null | undefined) {
   if (!value) return null;
 
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
 
-  if (!match) {
-    return null;
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    return `${year}-${month}-${day}`;
   }
 
-  const [, year, month, day] = match;
-  return `${year}-${month}-${day}`;
+  const brMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+
+  if (brMatch) {
+    const [, day, month, year] = brMatch;
+    return `${year}-${month}-${day}`;
+  }
+
+  return null;
 }
 
 function parseDate(value: string | null | undefined) {
