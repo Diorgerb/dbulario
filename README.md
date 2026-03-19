@@ -9,6 +9,7 @@ Plataforma de monitoramento e inteligência regulatória para o Bulário Eletrô
 O **DBulário** é uma solução que automatiza a coleta, estruturação e análise de dados do Bulário Eletrônico da ANVISA, permitindo o acompanhamento contínuo de atualizações de bulas de medicamentos.
 
 A ferramenta transforma dados públicos dispersos em informação estruturada, rastreável e acionável para equipes de Assuntos Regulatórios.
+Saiba mais em: https://dbulario.vercel.app/sobre
 
 ---
 
@@ -80,11 +81,11 @@ O DBulário automatiza todo o fluxo:
 
 ```mermaid
 flowchart LR
-A[Bulário ANVISA] --> B[Coleta automatizada]
-B --> C[Tratamento de dados]
-C --> D[Estruturação (CSV/DB)]
-D --> E[Aplicação de filtros]
-E --> F[Interface Web / Insights]
+A["Bulário ANVISA"] --> B["Coleta automatizada"]
+B --> C["Tratamento de dados"]
+C --> D["Estruturação (CSV/DB)"]
+D --> E["Aplicação de filtros"]
+E --> F["Interface Web / Insights"]
 ```
 
 ---
@@ -127,9 +128,6 @@ E --> F[Interface Web / Insights]
 
 ## 🤝 Contribuição
 
-1. Fork do projeto  
-2. Criação de branch (`feature/nome-da-feature`)  
-3. Commit das alterações  
-4. Abertura de Pull Request  
+Acesse: https://dbulario.vercel.app/contato
 
 
