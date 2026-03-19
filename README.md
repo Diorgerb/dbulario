@@ -68,12 +68,12 @@ O DBulário automatiza todo o fluxo:
 | idProduto       | Identificador do produto         |
 | numeroRegistro  | Registro ANVISA                  |
 | nomeProduto     | Nome do medicamento              |
-| expediente      | Código do expediente             |
+| expediente      | Expediente                       |
 | razaoSocial     | Empresa detentora                |
 | cnpj            | CNPJ                             |
-| data            | Data do evento                   |
+| data            | Última atualização identificada  |
 | numProcesso     | Número do processo               |
-| dataAtualizacao | Última atualização identificada  |
+| dataAtualizacao | Última atualização plataforma    |
 
 ---
 
