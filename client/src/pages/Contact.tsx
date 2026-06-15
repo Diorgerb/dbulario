@@ -51,7 +51,7 @@ export default function Contact() {
                 href="tel:+553199772268"
                 className="text-primary hover:text-primary/80 underline font-medium"
               >
-                (31) 99772-2268
+                (31) 99772-2468
               </a>
             </div>
 
