@@ -98,9 +98,19 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-border pt-8 flex flex-col items-center gap-4 text-xs text-muted-foreground text-center">
           <p>
-            © {currentYear} DBULÁRIO. Todos os direitos reservados.
+            © {currentYear} DBULÁRIO. Todos os direitos reservados. </p>
+           
+          <p>
+            Made with care by{' '}
+            <a
+              href="https://diorgerb.github.io/Portfolio/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-white transition"
+            >
+              Diórger B.
+            </a>
           </p>
-            
 
         </div>
       </div>
