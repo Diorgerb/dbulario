@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build and production outputs
+dist/
+build/
+*.dist
+out/
+.vercel
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.manus-logs/
+
+# Testing and Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Cache and temporary files
+*.tsbuildinfo
+.eslintcache
+.vite/
+.temp/
+.cache/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+
+# IDEs and Editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
