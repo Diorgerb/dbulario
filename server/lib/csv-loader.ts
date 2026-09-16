@@ -193,6 +193,7 @@ export function listMedications(
     registrationNumber: m.registrationNumber,
     holder: m.holder ?? "-",
     cnpj: m.cnpj ?? "-",
+    expediente: m.expediente,
     processNumber: m.processNumber ?? "-",
     publicationDate: m.publicationDate
       ? m.publicationDate.toISOString()
