@@ -16,6 +16,8 @@ export type Comparison = {
   current: { expediente: string; publicationDate: string; sha256: string };
   summary: { changedSections: number; addedWords: number; removedWords: number; similarity: number };
   sections: SectionDiff[]; createdAt: string; cached: boolean;
+  /** True only when the last saved comparison is shown without a successful fresh history check. */
+  stale?: boolean;
 };
 const ROOT = path.join(process.cwd(), "data", "bula-diffs");
 let pool: mysql.Pool | undefined;
@@ -23,7 +25,7 @@ let initialized = false;
 
 async function database() {
   if (!process.env.DATABASE_URL) {
-    if (process.env.VERCEL) throw new Error("Persistência não configurada: configure DATABASE_URL e migre o banco antes de habilitar comparações na Vercel.");
+    if (process.env.VERCEL) throw new Error("Persistência não configurada: configure DATABASE_URL antes de habilitar comparações na Vercel.");
     return null;
   }
   pool ??= mysql.createPool(process.env.DATABASE_URL);
@@ -82,10 +84,10 @@ export async function getComparison(reg: string, kind: BulaKind, previous: strin
   const db = await database();
   if (db) {
     const [rows] = await db.query<mysql.RowDataPacket[]>("SELECT json FROM dbulario_bula_comparisons WHERE registro=? AND tipo=? AND previous_sha=? AND current_sha=?", [reg, kind, previous, current]);
-    return rows.length ? { ...(JSON.parse(rows[0].json) as Comparison), cached: true } : null;
+    return rows.length ? { ...(JSON.parse(rows[0].json) as Comparison), cached: true, stale: false } : null;
   }
   const value = await readJson<Comparison>(file("comparisons", safe(reg), kind, `${previous}__${current}.json`));
-  return value ? { ...value, cached: true } : null;
+  return value ? { ...value, cached: true, stale: false } : null;
 }
 export async function saveComparison(value: Comparison) {
   const db = await database();
@@ -95,14 +97,21 @@ export async function saveComparison(value: Comparison) {
   }
   await writeJson(file("comparisons", safe(value.registrationNumber), value.type, `${value.previous.sha256}__${value.current.sha256}.json`), value);
 }
+/** With fingerprint="", return the most recent saved result, explicitly flagged as unverified. */
 export async function getSnapshot(reg: string, kind: BulaKind, fingerprint: string): Promise<Comparison | null> {
   const db = await database();
   if (db) {
-    const [rows] = await db.query<mysql.RowDataPacket[]>("SELECT json FROM dbulario_bula_snapshots WHERE registro=? AND tipo=? AND fingerprint=?", [reg, kind, fingerprint]);
-    return rows.length ? { ...(JSON.parse(rows[0].json) as Comparison), cached: true } : null;
+    const sql = fingerprint
+      ? "SELECT json FROM dbulario_bula_snapshots WHERE registro=? AND tipo=? AND fingerprint=?"
+      : "SELECT json FROM dbulario_bula_snapshots WHERE registro=? AND tipo=?";
+    const params = fingerprint ? [reg, kind, fingerprint] : [reg, kind];
+    const [rows] = await db.query<mysql.RowDataPacket[]>(sql, params);
+    return rows.length ? { ...(JSON.parse(rows[0].json) as Comparison), cached: true, stale: !fingerprint } : null;
   }
   const value = await readJson<{ fingerprint: string; comparison: Comparison }>(file("snapshots", `${safe(reg)}_${kind}.json`));
-  return value?.fingerprint === fingerprint ? { ...value.comparison, cached: true } : null;
+  return value && (!fingerprint || value.fingerprint === fingerprint)
+    ? { ...value.comparison, cached: true, stale: !fingerprint }
+    : null;
 }
 export async function saveSnapshot(reg: string, kind: BulaKind, fingerprint: string, comparison: Comparison) {
   const db = await database();
