@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { AnvisaBrowser } from "./browser-anvisa.js";
+import { AnvisaBrowser, AnvisaAccessError } from "./browser-anvisa.js";
 import { extractDocuments } from "./extract.js";
 import { compareDocuments } from "./diff.js";
 import { getComparison, getSnapshot, getVersion, saveComparison, saveSnapshot, saveVersion, type BulaKind, type Comparison, type StoredVersion } from "./cache.js";
@@ -27,8 +27,8 @@ function fingerprint(items: HistoryItem[]): string {
   return sha256(JSON.stringify(items.map(item => [item.idDocumento ?? null, item.expediente ?? null, item.dataPublicacao ?? null])));
 }
 async function materialize(
-  api: AnvisaBrowser, registrationNumber: string, idProduto: number,
-  item: HistoryItem, type: BulaKind, buffer: Buffer, sha: string,
+  registrationNumber: string, idProduto: number, item: HistoryItem,
+  type: BulaKind, buffer: Buffer, sha: string,
 ): Promise<StoredVersion> {
   const saved = await getVersion(registrationNumber, type, sha);
   if (saved) return saved;
@@ -68,7 +68,7 @@ export async function compareLatest(input: {
   }
   const api = new AnvisaBrowser();
   try {
-    await api.open();
+    await api.open(idProduto, registrationNumber);
     const history = await api.history(idProduto);
     const apiRegistration = String(history?.registroProduto ?? "").replace(/\D/g, "");
     if (apiRegistration && apiRegistration !== registrationNumber) {
@@ -88,7 +88,7 @@ export async function compareLatest(input: {
     for (const item of items.slice(1)) {
       const candidate = await downloadWithFreshToken(api, item, type, idProduto);
       const hash = sha256(candidate);
-      if (hash === currentSha) continue; // republicação do mesmo PDF não constitui nova versão de conteúdo
+      if (hash === currentSha) continue;
       previousItem = item;
       previousPdf = candidate;
       previousSha = hash;
@@ -100,8 +100,8 @@ export async function compareLatest(input: {
       await saveSnapshot(registrationNumber, type, historyFingerprint, cached);
       return cached;
     }
-    const oldVersion = await materialize(api, registrationNumber, idProduto, previousItem, type, previousPdf, previousSha);
-    const newVersion = await materialize(api, registrationNumber, idProduto, currentItem, type, currentPdf, currentSha);
+    const oldVersion = await materialize(registrationNumber, idProduto, previousItem, type, previousPdf, previousSha);
+    const newVersion = await materialize(registrationNumber, idProduto, currentItem, type, currentPdf, currentSha);
     const sections = compareDocuments(oldVersion.documents, newVersion.documents);
     const changed = sections.filter(section => section.changed);
     const result: Comparison = {
@@ -116,11 +116,25 @@ export async function compareLatest(input: {
         removedWords: changed.reduce((sum, section) => sum + section.removedWords, 0),
         similarity: sections.length ? sections.reduce((sum, section) => sum + section.similarity, 0) / sections.length : 1,
       },
-      sections, createdAt: new Date().toISOString(), cached: false,
+      sections, createdAt: new Date().toISOString(), cached: false, stale: false,
     };
     await saveComparison(result);
     await saveSnapshot(registrationNumber, type, historyFingerprint, result);
     return result;
+  } catch (error) {
+    if (error instanceof AnvisaAccessError) {
+      console.error("[BULA_DIFF] anvisa_access_error", { code: error.code, stage: error.stage, status: error.httpStatus ?? null, environment: process.env.VERCEL ? "vercel" : "local" });
+      try {
+        const saved = await getSnapshot(registrationNumber, type, "");
+        if (saved) {
+          console.warn("[BULA_DIFF] returning_unverified_saved_comparison", { registrationNumber, type });
+          return saved;
+        }
+      } catch (cacheError) {
+        console.error("[BULA_DIFF] cache_lookup_failed", { reason: cacheError instanceof Error ? cacheError.message.slice(0, 250) : "unknown" });
+      }
+    }
+    throw error;
   } finally {
     await api.close();
   }
