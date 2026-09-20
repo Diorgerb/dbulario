@@ -38,6 +38,7 @@ coverage/
 .vite/
 .temp/
 .cache/
+data/bula-diffs/
 
 # Local databases
 *.db
