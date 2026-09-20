@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
 import Medications from "./pages/Medications";
+import BulaCompare from "./pages/BulaCompare";
 import Contact from "./pages/Contact";
 
 function Router() {
@@ -18,6 +19,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/medicamentos" component={Medications} />
+      <Route path="/comparar-bulas" component={BulaCompare} />
+      <Route path="/comparar-bulas/:registro" component={BulaCompare} />
       <Route path="/sobre" component={About} />
       <Route path="/faq" component={FAQ} />
       <Route path="/contato" component={Contact} />
@@ -29,11 +32,7 @@ function Router() {
 
 function App() {
   const [location] = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [location]);
-
+  useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: "auto" }); }, [location]);
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
