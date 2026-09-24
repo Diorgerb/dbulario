@@ -174,8 +174,8 @@ export default function Medications() {
               </SelectContent>
             </Select>
 
-            <Select disabled className="w-56">
-              <SelectTrigger>
+            <Select disabled>
+              <SelectTrigger className="w-56">
                 <SelectValue placeholder="Lista Medicamentos Referências (sob demanda)" />
               </SelectTrigger>
               <SelectContent>
